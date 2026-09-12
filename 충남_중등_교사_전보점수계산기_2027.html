@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>충남 중등 교사 전보 점수 계산기 · 2027학년도</title>
+<style>
+  :root{
+    --blue:#1e5fa8; --blue-d:#164a85; --bg:#f4f6fa; --card:#ffffff;
+    --line:#dde3ec; --txt:#26303d; --sub:#67748a; --accent:#e8f0fb;
+    --green:#2e7d32; --green-bg:#eef8ee; --amber:#7a5d00; --amber-bg:#fff8e6;
+    --red:#b03a3a; --red-bg:#fbe9e9;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:var(--bg);color:var(--txt);font-size:15px;line-height:1.55;padding-bottom:96px}
+  .wrap{max-width:920px;margin:0 auto;padding:20px 14px}
+  header{background:linear-gradient(135deg,var(--blue),#2f7fd0);color:#fff;border-radius:12px;padding:22px 24px;margin-bottom:14px}
+  header h1{font-size:22px;margin-bottom:6px}
+  header p{font-size:13px;opacity:.94}
+  .warn{background:var(--amber-bg);border:1px solid #f2dfa0;border-radius:10px;padding:12px 15px;font-size:12.5px;color:#6b5710;margin-bottom:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:16px}
+  .card h2{font-size:17px;color:var(--blue-d);margin-bottom:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .badge{font-size:12px;background:var(--accent);color:var(--blue-d);border-radius:20px;padding:2px 10px;font-weight:normal}
+  .desc{font-size:12.5px;color:var(--sub);margin-bottom:12px}
+  .subtotal{margin-top:12px;text-align:right;font-size:15px;font-weight:bold;color:var(--blue-d);border-top:1px dashed var(--line);padding-top:10px}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  button{cursor:pointer;font-family:inherit}
+  .btn{border:1px solid var(--blue);background:#fff;color:var(--blue-d);border-radius:8px;padding:7px 12px;font-size:13px}
+  .btn:hover{background:var(--accent)}
+  .btn-reset{border-color:#c7ccd4;color:#555}
+  .btn-add{background:var(--accent);color:var(--blue-d);border:1px dashed var(--blue);border-radius:8px;padding:6px 12px;font-size:12.5px}
+  .btn-del{background:var(--red-bg);color:var(--red);border:none;border-radius:6px;padding:5px 8px;font-size:12px}
+  select,input[type=number],input[type=text]{padding:6px 8px;border:1px solid var(--line);border-radius:7px;font-size:13.5px;font-family:inherit;background:#fff}
+  input[type=number]{width:72px;text-align:right}
+  select:focus,input:focus{outline:2px solid #9cc0ea}
+  .year-block{border:1px solid #e5e9f0;border-radius:10px;margin:10px 0;background:#fbfcfe;overflow:hidden}
+  .year-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#f3f7fc;padding:9px 12px;border-bottom:1px solid #e6ebf2}
+  .year-head b{color:var(--blue-d)}
+  .year-head .yp{margin-left:auto;font-weight:bold;color:var(--blue)}
+  .segments{padding:2px 12px}
+  .seg-row{display:flex;flex-wrap:wrap;gap:7px;align-items:center;padding:8px 0;border-bottom:1px solid #eef1f6}
+  .seg-row:last-child{border-bottom:none}
+  .seg-row .segpts{margin-left:auto;min-width:70px;text-align:right;font-weight:bold;color:var(--blue)}
+  .seg-row .muted{font-size:12px;color:var(--sub)}
+  .year-actions{padding:8px 12px 11px}
+  .ambig{display:none;margin:0 12px 10px;padding:7px 9px;border-radius:7px;background:#fff4e5;color:#815500;font-size:12px}
+  .g-item{border:1px solid #edf0f5;border-radius:10px;padding:10px 12px;margin-bottom:8px;background:#fbfcfe}
+  .g-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .g-head .no{background:var(--blue);color:#fff;font-size:12px;border-radius:6px;padding:1px 7px;flex-shrink:0}
+  .g-head .name{font-weight:bold;font-size:14.5px}
+  .g-head .cap{font-size:12px;color:var(--sub)}
+  .g-head .pts{margin-left:auto;font-weight:bold;color:var(--blue);font-size:15px}
+  .g-body{margin-top:8px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:13.5px;color:#3d4a5c}
+  .g-note{width:100%;font-size:12px;color:var(--sub)}
+  .row-item{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid #eef1f6}
+  .row-item:last-child{border-bottom:none}
+  .row-pts{margin-left:auto;font-weight:bold;color:var(--blue);min-width:56px;text-align:right}
+  .choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 12px;margin-top:8px}
+  .choice-grid label{display:flex;gap:7px;align-items:flex-start;font-size:13px;padding:7px 8px;border:1px solid #edf0f5;border-radius:8px;background:#fff}
+  .result-box{border:1px solid #cfe0f3;background:#f4f9ff;border-radius:10px;padding:12px 14px;margin-top:12px;font-size:13px}
+  .result-box.good{border-color:#bcd8b8;background:var(--green-bg)}
+  details{margin-top:8px;font-size:13px}
+  details summary{cursor:pointer;color:var(--blue);font-weight:bold}
+  details .dt-body{padding:10px 4px 2px;color:#3d4a5c}
+  table{width:100%;border-collapse:collapse;margin:7px 0}
+  th,td{border:1px solid var(--line);padding:6px 7px;font-size:12.5px;text-align:center;vertical-align:middle}
+  th{background:var(--accent)}
+  td.left{text-align:left}
+  .small{font-size:12px;color:var(--sub)}
+  .sticky{position:fixed;left:0;right:0;bottom:0;background:var(--blue-d);color:#fff;padding:12px 16px;box-shadow:0 -3px 12px rgba(0,0,0,.18);z-index:50}
+  .sticky .inner{max-width:920px;margin:0 auto;display:flex;align-items:center;gap:15px;flex-wrap:wrap}
+  .sticky .part{font-size:13px;opacity:.95}
+  .sticky .part b{font-size:16px;margin-left:4px}
+  .sticky .total{margin-left:auto;font-size:15px}
+  .sticky .total b{font-size:24px;color:#ffd76b;margin-left:6px}
+  .tag{display:inline-block;border-radius:11px;padding:1px 8px;font-size:11px;background:#eef5ff;color:#2f5f9e}
+  .source-note{font-size:12px;color:var(--sub);text-align:center;padding:2px 0 18px}
+  @media(max-width:650px){
+    .choice-grid{grid-template-columns:1fr}
+    .seg-row select{max-width:100%}
+    .year-head .yp{margin-left:0}
+    .sticky .total{margin-left:0;width:100%}
+  }
+  @media print{
+    body{padding-bottom:0;background:#fff}
+    .sticky,.toolbar,.btn-add,.btn-del{display:none!important}
+    .card,.year-block{break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>충남 중등 교사 전보 점수 계산기</h1>
+  <p>2027학년도 충청남도교육청 중등 교육공무원 인사관리원칙(2026. 7.) 기준 · 전입순위자명부 제25조 · 작성기준일 2027. 2. 28.</p>
+</header>
+
+<div class="toolbar">
+  <button class="btn" onclick="window.print()">🖨️ 인쇄</button>
+  <button class="btn btn-reset" onclick="resetAll()">↺ 입력 초기화</button>
+</div>
+
+<div class="warn">
+  ⚠️ <b>참고용 계산기</b>입니다. 실제 전보 평정은 NEIS 전보희망서와 교육청 확인 결과가 우선합니다.
+  중등은 초등 계산 방식과 달리 <b>구역점수를 최근 5개 학년도별 1년 단위</b>로 평정하며, 6개월 이상 근무한 구역을 1년 점수로 인정합니다.
+  5개월 25일은 6개월로 반올림하지 않는다는 행정사항을 반영해, 아래에는 <b>인정되는 '개월 수'</b>를 직접 입력하도록 구성했습니다.
+  가산점은 최근 5년 이내 <b>현임교(기관)</b> 실적을 기준으로 하고, 각 항목별 상한을 적용합니다.
+</div>
+
+<section class="card">
+  <h2>① 구역점수 <span class="badge">최근 5년 · 2022.3.1.~2027.2.28.</span></h2>
+  <p class="desc">각 학년도에 근무한 지역을 입력하세요. 한 학년도에 서로 다른 두 구역을 각각 6개월 근무했다면 둘 다 입력하면 유리한 점수를 자동 적용합니다. 파견은 현소속교와 파견기관 지역 중 유리한 구역점수를 선택하여 입력하세요.</p>
+  <div id="careerYears"></div>
+  <div class="subtotal">구역점수 합계: <span id="careerTotal">0.00</span>점</div>
+
+  <details>
+    <summary>구역·행정구분별 1년 평점표 보기</summary>
+    <div class="dt-body">
+      <table>
+        <tr><th>구역</th><th>해당 시·군</th><th>시</th><th>읍</th><th>면·리</th></tr>
+        <tr><td>가</td><td class="left">천안</td><td>1.00</td><td>1.25</td><td>1.50</td></tr>
+        <tr><td>나</td><td class="left">공주·아산·논산(계룡)</td><td>1.50</td><td>1.75</td><td>2.00</td></tr>
+        <tr><td>다</td><td class="left">부여·금산*</td><td>2.00</td><td>2.25</td><td>2.50</td></tr>
+        <tr><td>라1</td><td class="left">보령·당진·서천·청양·홍성·예산</td><td>2.50</td><td>2.75</td><td>3.00</td></tr>
+        <tr><td>라2</td><td class="left">서산</td><td>2.90</td><td>3.15</td><td>3.40</td></tr>
+        <tr><td>마</td><td class="left">태안</td><td>3.20</td><td>3.45</td><td>3.70</td></tr>
+      </table>
+      <div class="small">* 금산은 2026.2.28.까지 '나' 구역, 2026.3.1.부터 '다' 구역. 계룡시는 '나-시 1.50'으로 평정. 안면읍·유구읍·웅천읍·대산읍은 '면·리'로 평정. 타시도 전입 경력은 1년 0.50점, 육아휴직 최초 1년 이후 기간은 1년 1.00점.</div>
+    </div>
+  </details>
+</section>
+
+<section class="card">
+  <h2>② 근무성적점수 <span class="badge">2027.3.1. 전보: 2024·2025년 근평</span></h2>
+  <p class="desc">수 5.0 · 우 4.5 · 미·양 4.0. 최근 2년 중 근평이 1회만 있으면 그 1회 점수를 2배합니다. 최근 2년 근평이 없으면 2년 이전의 가장 최근 근평을 2배하며, 근평 자체가 없는 경우 총 4.0점을 반영합니다.</p>
+  <div class="g-body" style="margin-top:0">
+    <label>근평 상황
+      <select id="rateMode" onchange="renderRateInputs();calcAll()">
+        <option value="unselected">근평 상황을 선택하세요</option>
+        <option value="two">2024·2025 근평 2회 있음</option>
+        <option value="one">최근 2년 중 근평 1회만 있음</option>
+        <option value="prior">최근 2년 없음 · 2년 이전 근평 있음</option>
+        <option value="none">근평 자체 없음</option>
+      </select>
+    </label>
+    <span id="rateInputs"></span>
+  </div>
+  <div class="subtotal">근무성적점수: <span id="rateTotal">0.00</span>점</div>
+</section>
+
+<section class="card">
+  <h2>③ 가산점 <span class="badge">최근 5년 이내 · 현임교(기관)</span></h2>
+  <p class="desc">제25조 ③ 표의 14개 항목과 기타 가산점을 반영했습니다. 항목별 상한을 자동 적용합니다. 동일한 체육·학예·기능지도 실적을 ① 지도실적과 ⑩ 표창에 중복 사용하지 마세요.</p>
+
+  <div class="g-item">
+    <div class="g-head"><span class="no">1</span><span class="name">체육·학예·기능지도 실적</span><span class="cap">상한 3.0 · 1년당 1개</span><span class="pts" id="p1">0.00</span></div>
+    <div class="g-body" style="display:block">
+      <div id="awardRows"></div>
+      <button class="btn-add" onclick="addAwardRow()">＋ 지도실적 추가</button>
+      <div class="g-note">전국 1·2·3등급 = 3.0 / 2.5 / 2.0 · 시도 1·2·3등급 = 2.0 / 1.5 / 1.0. 같은 연도에 여러 실적을 입력하면 가장 높은 1개만 자동 반영합니다.</div>
+    </div>
+  </div>
+
+  <div class="g-item"><div class="g-head"><span class="no">2</span><span class="name">분교장·소규모학교(교감미배치교) 근무</span><span class="cap">상한 1.5</span><span class="pts" id="p2">0.00</span></div><div class="g-body">경력 <input id="i2" type="number" min="0" max="60" value="0" oninput="calcAll()"> 개월 <span class="g-note">6개월당 0.25점</span></div></div>
+  <div class="g-item"><div class="g-head"><span class="no">3</span><span class="name">제2농장·공동실습소·직업훈련과정 전담교사</span><span class="cap">상한 1.5</span><span class="pts" id="p3">0.00</span></div><div class="g-body">경력 <input id="i3" type="number" min="0" max="60" value="0" oninput="calcAll()"> 개월 <span class="g-note">6개월당 0.25점</span></div></div>
+  <div class="g-item"><div class="g-head"><span class="no">4</span><span class="name">방송중·고 담임 / 재소자교육 / 특수학교(급) 재택지도 / 영재교육 담당</span><span class="cap">상한 1.5</span><span class="pts" id="p4">0.00</span></div><div class="g-body">경력 <input id="i4" type="number" min="0" max="60" value="0" oninput="calcAll()"> 개월 <span class="g-note">6개월당 0.25점</span></div></div>
+  <div class="g-item"><div class="g-head"><span class="no">5</span><span class="name">겸임(순회)교사 근무</span><span class="cap">상한 3.0</span><span class="pts" id="p5">0.00</span></div><div class="g-body">경력 <input id="i5" type="number" min="0" max="60" value="0" oninput="calcAll()"> 개월 <span class="g-note">6개월(학기)당 0.5점 · 통합·병설학교 내 겸임(순회) 및 전문상담순회교사 포함</span></div></div>
+  <div class="g-item"><div class="g-head"><span class="no">6</span><span class="name">학교 소재 시·군 실거주</span><span class="cap">상한 2.0</span><span class="pts" id="p6">0.00</span></div><div class="g-body">실거주 <input id="i6" type="number" min="0" max="60" value="0" oninput="calcAll()"> 개월 <span class="g-note">6개월당 0.2점 · 한 달 중 15일 이상 근무 시 1개월로 인정</span></div></div>
+  <div class="g-item"><div class="g-head"><span class="no">7</span><span class="name">'라'·'마' 구역 초빙교사</span><span class="cap">상한 2.5</span><span class="pts" id="p7">0.00</span></div><div class="g-body">초빙 경력 <input id="i7" type="number" min="0" max="60" value="0" oninput="calcAll()"> 개월 <span class="g-note">1년당 0.5점</span></div></div>
+  <div class="g-item"><div class="g-head"><span class="no">8</span><span class="name">복수교과 지도실적</span><span class="cap">상한 2.0</span><span class="pts" id="p8">0.00</span></div><div class="g-body">지도 경력 <input id="i8" type="number" min="0" max="60" value="0" oninput="calcAll()"> 개월 <span class="g-note">복수자격 소지자가 복수교과 지도 시 · 6개월당 0.5점</span></div></div>
+  <div class="g-item"><div class="g-head"><span class="no">9</span><span class="name">정원감(통폐합 포함)·과목조절감</span><span class="cap">2.0</span><span class="pts" id="p9">0.00</span></div><div class="g-body"><label><input id="i9" type="checkbox" onchange="calcAll()"> 가산점 적용 대상</label><span class="g-note">구역근속만기자·학교근속만기자·과목변경자·결원교과 해당자는 제외. 결원 자리가 정원감이 되는 경우 남은 교사에게 정원감 가산점을 부여하지 않음.</span></div></div>
+  <div class="g-item"><div class="g-head"><span class="no">10</span><span class="name">각종 표창 수상</span><span class="cap">상한 3.0</span><span class="pts" id="p10">0.00</span></div><div class="g-body">교육감·장관 교육활동 유공 표창 <input id="i10" type="number" min="0" max="5" value="0" oninput="calcAll()"> 개 <span class="g-note">1년당 1개만 인정 · 1개당 1.0점 · 상장은 제외 · 체육·학예·기능지도 실적과 같은 증빙 중복 사용 불가</span></div></div>
+  <div class="g-item"><div class="g-head"><span class="no">11</span><span class="name">다출산 교원</span><span class="cap">상한 2.0</span><span class="pts" id="p11">0.00</span></div><div class="g-body"><label><input id="i11" type="checkbox" onchange="calcAll()"> 둘째(포함) 이후 자녀 출산 해당</label><span class="g-note">남·여 교원 모두 적용 · 2017.3.1. 이후 현임교 실적만 인정</span></div></div>
+  <div class="g-item"><div class="g-head"><span class="no">12</span><span class="name">교육시책 담당자</span><span class="cap">상한 2.0</span><span class="pts" id="p12">0.00</span></div><div class="g-body">인정 경력 <input id="i12" type="number" min="0" max="60" value="0" oninput="calcAll()"> 개월 <span class="g-note">6개월당 0.2점 · 동일기간 1항목만 적용. 산업수요맞춤형고·농산어촌연중돌봄·혁신(미래)학교 근무, 교육복지 업무, 한국어학급 담임, 고교 공동교육과정 거점 업무, 특수교육지원센터·Wee센터, 충남형IB학교(후보·인증)·이주배경학생 밀집 학교 등</span></div></div>
+
+  <div class="g-item">
+    <div class="g-head"><span class="no">13</span><span class="name">영어교사 직무연수 실적</span><span class="cap">상한 1.25</span><span class="pts" id="p13">0.00</span></div>
+    <div class="g-body" style="display:block">
+      <div id="englishYears"></div>
+      <div class="g-note">최근 5년 영어교과 관련 집합연수만 해당 · 1년 1회만 인정 · 60시간(1강좌, 4학점) 이상 0.25점 / 120시간(1강좌, 8학점) 이상 0.5점 · 여러 강좌 시간 합산 불가</div>
+    </div>
+  </div>
+
+  <div class="g-item"><div class="g-head"><span class="no">14</span><span class="name">보직교사 가산점</span><span class="cap">상한 2.0</span><span class="pts" id="p14">0.00</span></div><div class="g-body">경력 <input id="i14" type="number" min="0" max="60" value="0" oninput="calcAll()"> 개월 <span class="g-note">생활지도업무담당부장 또는 교감미배치교 교무업무담당부장 · 6개월당 0.2점</span></div></div>
+
+  <div class="g-item">
+    <div class="g-head"><span class="no">기타</span><span class="name">기타 가산점</span><span class="cap">아래 1항목만 인정 · 각 1.0</span><span class="pts" id="pEtc">0.00</span></div>
+    <div class="g-body">
+      <select id="iEtc" onchange="calcAll()">
+        <option value="0">해당 없음</option>
+        <option value="1">부부교직원 — 일방이 상대방 근무지역으로 합치는 경우</option>
+        <option value="1">75세 이상 노부모 실제 동거 봉양</option>
+        <option value="1">장애정도가 심한 장애인 부양 — 본인 및 실제 동거 부양자</option>
+        <option value="1">국가·독립유공자</option>
+        <option value="1">현임교 재직 중 사망공무원의 미혼 자녀</option>
+        <option value="1">부부 중 일방 사망교원 — 자녀가 각급 학교 재학 중</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="subtotal">가산점 합계: <span id="bonusTotal">0.00</span>점</div>
+</section>
+
+<section class="card">
+  <h2>④ 우선전보 해당 여부 <span class="badge">점수와 별도 · 제26조</span></h2>
+  <p class="desc">아래는 전입순위자명부 점수에 더하는 항목이 아니라 우선전보 검토 항목입니다. 해당 항목을 체크하면 결과에 표시합니다.</p>
+  <div class="choice-grid" id="priorityGrid">
+    <label><input type="checkbox" class="priority" value="1" onchange="calcPriority()">① 전국소년체전·전국체전 도대표 선수(팀) 육성학교 지도교사</label>
+    <label><input type="checkbox" class="priority" value="2" onchange="calcPriority()">② 현임교 재직 중 사망 교원(교육전문직 포함)의 배우자 또는 미혼자녀</label>
+    <label><input type="checkbox" class="priority" value="3" onchange="calcPriority()">③ 국가(독립)유공자인 본인 또는 배우자</label>
+    <label><input type="checkbox" class="priority" value="4" onchange="calcPriority()">④ 통폐합학교·정원감축·과목조절감축으로 동일급지 이하 타구역 전보</label>
+    <label><input type="checkbox" class="priority" value="5" onchange="calcPriority()">⑤ 도내 교육기관·행정기관·연수기관 등에 2년 이상 파견 후 복귀</label>
+    <label><input type="checkbox" class="priority" value="6" onchange="calcPriority()">⑥ 공립교사가 사립학교에 2년 이상 파견 후 복귀</label>
+    <label><input type="checkbox" class="priority" value="7" onchange="calcPriority()">⑦ 장애정도가 심한 장애 부모·자녀·배우자 실제 부양(본인 포함)</label>
+    <label><input type="checkbox" class="priority" value="8" onchange="calcPriority()">⑧ 셋째 이상 자녀 출산·입양(청간 전보, 자녀 기준 등 세부요건 확인)</label>
+    <label><input type="checkbox" class="priority" value="9" onchange="calcPriority()">⑨ 신설학교 개설업무 담당자</label>
+    <label><input type="checkbox" class="priority" value="10" onchange="calcPriority()">⑩ 여해학교·충남다사랑학교·충남다우리학교 3년 이상 연속 근무</label>
+  </div>
+  <div id="priorityResult" class="result-box">우선전보 해당 항목 없음</div>
+</section>
+
+<section class="card">
+  <h2>전보 적용 참고</h2>
+  <details open>
+    <summary>동점자 처리 기준</summary>
+    <div class="dt-body">① 현임교 장기근속자 → ② 현임 시·군 장기근속자 → ③ 생년월일이 빠른 자</div>
+  </details>
+  <details>
+    <summary>인사구역 및 근속기간</summary>
+    <div class="dt-body">가: 천안 8년 · 나: 공주·아산·논산(계룡) 10년 · 다: 부여·금산 15년 · 라1: 보령·당진·서천·청양·홍성·예산 무제한 · 라2: 서산 무제한 · 마: 태안 무제한. 학교 근속은 원칙적으로 5년이며 일부 특성화·산업수요맞춤형고·특목고 선정교사 등은 6년 규정이 적용됩니다.</div>
+  </details>
+  <details>
+    <summary>중·고등학교 간 전입 경합 순서</summary>
+    <div class="dt-body">
+      <b>중학교 전입:</b> 동일 시·군 중학교 → 동일 시·군 고교 → 타 시·군 중학교 → 타 시·군 고교<br>
+      <b>고등학교 전입:</b> 동일 시·군 고교 → 동일 시·군 중학교 → 타 시·군 고교 → 타 시·군 중학교<br>
+      <b>특수학교(학급) 전입:</b> 동일 시·군 중·고교 → 타 시·군 중·고교
+    </div>
+  </details>
+  <details>
+    <summary>전보희망 기본 조건</summary>
+    <div class="dt-body">최근 현임교 실교육경력 1년(365일) 이상인 교사 중 학교장·기관장이 희망한 자가 원칙이며, 전보희망 인원은 단위학교 교사 정원의 30% 이내로 적용합니다. 동일교 근속만기 5년 및 구역 근속만기자는 순환전보가 원칙입니다. 세부 제외·예외 대상은 원문을 확인하세요.</div>
+  </details>
+</section>
+
+<div class="source-note">2027학년도 충청남도교육청 「중등 교육공무원 인사관리원칙」 제23조~제26조 및 전보희망 행정사항을 기준으로 재구성 · 제작/재구성: 김은서</div>
+</div>
+
+<div class="sticky">
+  <div class="inner">
+    <span class="part">구역 <b id="sCareer">0.00</b></span>
+    <span class="part">근평 <b id="sRate">0.00</b></span>
+    <span class="part">가산 <b id="sBonus">0.00</b></span>
+    <span class="total">전입순위 평정 총점 <b id="sTotal">0.00</b></span>
+  </div>
+</div>
+
+<script>
+const SCHOOL_YEARS = [2022,2023,2024,2025,2026];
+const CITY_INFO = {
+  cheonan:{name:'천안시', zone:'가'},
+  gongju:{name:'공주시', zone:'나'},
+  asan:{name:'아산시', zone:'나'},
+  nonsan:{name:'논산시', zone:'나'},
+  gyeryong:{name:'계룡시', zone:'나'},
+  buyeo:{name:'부여군', zone:'다'},
+  geumsan:{name:'금산군', zoneByYear:y => y>=2026 ? '다':'나'},
+  boryeong:{name:'보령시', zone:'라1'},
+  dangjin:{name:'당진시', zone:'라1'},
+  seocheon:{name:'서천군', zone:'라1'},
+  cheongyang:{name:'청양군', zone:'라1'},
+  hongseong:{name:'홍성군', zone:'라1'},
+  yesan:{name:'예산군', zone:'라1'},
+  seosan:{name:'서산시', zone:'라2'},
+  taean:{name:'태안군', zone:'마'}
+};
+const ZONE_RATES = {
+  '가':{city:1.00,eup:1.25,myeon:1.50},
+  '나':{city:1.50,eup:1.75,myeon:2.00},
+  '다':{city:2.00,eup:2.25,myeon:2.50},
+  '라1':{city:2.50,eup:2.75,myeon:3.00},
+  '라2':{city:2.90,eup:3.15,myeon:3.40},
+  '마':{city:3.20,eup:3.45,myeon:3.70}
+};
+let segSeq=0, awardSeq=0;
+
+function cityOptions(){
+  return Object.entries(CITY_INFO).map(([k,v])=>`<option value="${k}">${v.name}</option>`).join('');
+}
+function renderCareerYears(){
+  const root=document.getElementById('careerYears');
+  root.innerHTML='';
+  SCHOOL_YEARS.forEach(y=>{
+    const block=document.createElement('div');
+    block.className='year-block'; block.id='yb'+y;
+    const endYear=y+1;
+    block.innerHTML=`<div class="year-head"><b>${y}.3.1. ~ ${endYear}.2.${endYear===2024?'29':'28'}</b><span class="tag">${y}학년도 평정</span><span class="yp">연도 점수 <span id="yp${y}">0.00</span></span></div><div class="segments" id="segs${y}"></div><div class="ambig" id="amb${y}">⚠️ 여러 구역의 6개월 미만 경력이 합쳐 6개월 이상이지만 어느 한 구역도 6개월에 이르지 않습니다. 이 경우는 자동 확정하지 않으므로 교육청 평정기준을 확인하세요.</div><div class="year-actions"><button class="btn-add" onclick="addSegment(${y})">＋ 같은 학년도 다른 근무구간 추가</button></div>`;
+    root.appendChild(block);
+    addSegment(y);
+  });
+}
+function addSegment(year){
+  const id=++segSeq;
+  const row=document.createElement('div'); row.className='seg-row'; row.id='seg'+id; row.dataset.year=year;
+  row.innerHTML=`
+    <select id="stype${id}" onchange="toggleSeg(${id});calcAll()">
+      <option value="chungnam">충남 학교·기관</option>
+      <option value="outside">타시도 전입 경력 (1년 0.50)</option>
+      <option value="leave">육아휴직 최초 1년 이후 (1년 1.00)</option>
+    </select>
+    <span id="loc${id}">
+      <select id="city${id}" onchange="calcAll()">${cityOptions()}</select>
+      <select id="area${id}" onchange="calcAll()">
+        <option value="city">시(동 지역)</option>
+        <option value="eup">읍</option>
+        <option value="myeon">면·리</option>
+      </select>
+    </span>
+    <input type="number" id="mon${id}" min="0" max="12" value="0" oninput="calcAll()"> 개월
+    <span class="segpts" id="sp${id}">0.00</span>
+    <button class="btn-del" onclick="delSegment(${id})">삭제</button>`;
+  document.getElementById('segs'+year).appendChild(row);
+  calcAll();
+}
+function toggleSeg(id){
+  const type=document.getElementById('stype'+id).value;
+  document.getElementById('loc'+id).style.display=type==='chungnam'?'inline-flex':'none';
+}
+function delSegment(id){
+  const row=document.getElementById('seg'+id); if(!row)return;
+  const year=row.dataset.year; row.remove();
+  if(!document.querySelector(`#segs${year} .seg-row`)) addSegment(+year);
+  calcAll();
+}
+function getSegRate(id,year){
+  const type=document.getElementById('stype'+id).value;
+  if(type==='outside') return {key:'outside',rate:0.50,label:'타시도'};
+  if(type==='leave') return {key:'leave',rate:1.00,label:'육아휴직 잔여'};
+  const cityKey=document.getElementById('city'+id).value;
+  const area=document.getElementById('area'+id).value;
+  const info=CITY_INFO[cityKey];
+  const zone=typeof info.zoneByYear==='function'?info.zoneByYear(year):info.zone;
+  let area2=area;
+  if(cityKey==='gyeryong') area2='city';
+  const rate=ZONE_RATES[zone][area2];
+  return {key:`${zone}|${area2}`,rate,label:`${info.name} ${zone}`};
+}
+function calcCareer(){
+  let total=0;
+  SCHOOL_YEARS.forEach(year=>{
+    const groups={}; let totalMonths=0;
+    document.querySelectorAll(`#segs${year} .seg-row`).forEach(row=>{
+      const id=row.id.replace('seg','');
+      const months=Math.max(0,Math.min(12,parseInt(document.getElementById('mon'+id).value)||0));
+      totalMonths+=months;
+      const r=getSegRate(id,year);
+      if(!groups[r.key]) groups[r.key]={months:0,rate:r.rate};
+      groups[r.key].months+=months;
+      document.getElementById('sp'+id).textContent=(months>=6?r.rate:0).toFixed(2);
+    });
+    const eligible=Object.values(groups).filter(g=>g.months>=6);
+    const score=eligible.length?Math.max(...eligible.map(g=>g.rate)):0;
+    document.getElementById('yp'+year).textContent=score.toFixed(2);
+    const amb=document.getElementById('amb'+year);
+    amb.style.display=(totalMonths>=6 && eligible.length===0)?'block':'none';
+    total+=score;
+  });
+  document.getElementById('careerTotal').textContent=total.toFixed(2);
+  return total;
+}
+
+function ratingSelect(id){
+  return `<select id="${id}" onchange="calcAll()"><option value="0">선택</option><option value="5">수 (5.0)</option><option value="4.5">우 (4.5)</option><option value="4">미·양 (4.0)</option></select>`;
+}
+function renderRateInputs(){
+  const mode=document.getElementById('rateMode').value;
+  const box=document.getElementById('rateInputs');
+  if(mode==='unselected') box.innerHTML=`<span class="tag">근평 상황을 먼저 선택하세요</span>`;
+  else if(mode==='two') box.innerHTML=`2024 ${ratingSelect('rateA')} &nbsp; 2025 ${ratingSelect('rateB')}`;
+  else if(mode==='one') box.innerHTML=`보유 근평 ${ratingSelect('rateA')} × 2`;
+  else if(mode==='prior') box.innerHTML=`2년 이전 최근 근평 ${ratingSelect('rateA')} × 2`;
+  else box.innerHTML=`<span class="tag">근평 없음 → 4.0점</span>`;
+}
+function calcRating(){
+  const mode=document.getElementById('rateMode').value;
+  let score=0;
+  if(mode==='two') score=(+document.getElementById('rateA').value)+(+document.getElementById('rateB').value);
+  else if(mode==='one' || mode==='prior') score=(+document.getElementById('rateA').value)*2;
+  else if(mode==='none') score=4;
+  document.getElementById('rateTotal').textContent=score.toFixed(2);
+  return score;
+}
+
+const AWARD_PTS={national:[3.0,2.5,2.0],province:[2.0,1.5,1.0]};
+function addAwardRow(){
+  const id=++awardSeq;
+  const row=document.createElement('div'); row.className='row-item'; row.id='aw'+id;
+  row.innerHTML=`<select id="awYear${id}" onchange="calcAll()">${SCHOOL_YEARS.map(y=>`<option value="${y}">${y}</option>`).join('')}</select>년
+    <select id="awScope${id}" onchange="calcAll()"><option value="national">전국</option><option value="province">시도</option></select>
+    <select id="awGrade${id}" onchange="calcAll()"><option value="0">1등급</option><option value="1">2등급</option><option value="2">3등급</option></select>
+    <span class="row-pts" id="awP${id}">3.00</span><button class="btn-del" onclick="delAward(${id})">삭제</button>`;
+  document.getElementById('awardRows').appendChild(row); calcAll();
+}
+function delAward(id){const el=document.getElementById('aw'+id);if(el)el.remove();calcAll()}
+function calcAward(){
+  const perYear={};
+  document.querySelectorAll('#awardRows .row-item').forEach(row=>{
+    const id=row.id.replace('aw',''); const y=document.getElementById('awYear'+id).value;
+    const sc=document.getElementById('awScope'+id).value; const gr=+document.getElementById('awGrade'+id).value;
+    const p=AWARD_PTS[sc][gr]; document.getElementById('awP'+id).textContent=p.toFixed(2);
+    perYear[y]=Math.max(perYear[y]||0,p);
+  });
+  return Math.min(3,Object.values(perYear).reduce((s,v)=>s+v,0));
+}
+function renderEnglishYears(){
+  const root=document.getElementById('englishYears');
+  root.innerHTML=SCHOOL_YEARS.map(y=>`<div class="row-item"><span style="min-width:62px">${y}년</span><select id="eng${y}" onchange="calcAll()"><option value="0">해당 없음</option><option value="0.25">60시간 이상 1강좌 (0.25)</option><option value="0.5">120시간 이상 1강좌 (0.50)</option></select></div>`).join('');
+}
+const num=id=>{const el=document.getElementById(id);return el?Math.max(0,parseFloat(el.value)||0):0};
+const unit=(months,u,p)=>Math.floor(months/u)*p;
+const cap=(v,c)=>Math.min(v,c);
+function calcBonus(){
+  const b={};
+  b.p1=calcAward();
+  b.p2=cap(unit(num('i2'),6,0.25),1.5);
+  b.p3=cap(unit(num('i3'),6,0.25),1.5);
+  b.p4=cap(unit(num('i4'),6,0.25),1.5);
+  b.p5=cap(unit(num('i5'),6,0.5),3.0);
+  b.p6=cap(unit(num('i6'),6,0.2),2.0);
+  b.p7=cap(unit(num('i7'),12,0.5),2.5);
+  b.p8=cap(unit(num('i8'),6,0.5),2.0);
+  b.p9=document.getElementById('i9').checked?2.0:0;
+  b.p10=cap(Math.floor(num('i10'))*1.0,3.0);
+  b.p11=document.getElementById('i11').checked?2.0:0;
+  b.p12=cap(unit(num('i12'),6,0.2),2.0);
+  b.p13=cap(SCHOOL_YEARS.reduce((s,y)=>s+(parseFloat(document.getElementById('eng'+y).value)||0),0),1.25);
+  b.p14=cap(unit(num('i14'),6,0.2),2.0);
+  b.pEtc=parseFloat(document.getElementById('iEtc').value)||0;
+  Object.entries(b).forEach(([k,v])=>{const el=document.getElementById(k);if(el)el.textContent=v.toFixed(2)});
+  const total=Object.values(b).reduce((s,v)=>s+v,0);
+  document.getElementById('bonusTotal').textContent=total.toFixed(2);
+  return total;
+}
+function calcPriority(){
+  const checked=[...document.querySelectorAll('.priority:checked')].map(x=>x.value);
+  const box=document.getElementById('priorityResult');
+  if(!checked.length){box.className='result-box';box.textContent='우선전보 해당 항목 없음';return}
+  box.className='result-box good';
+  const special=checked.includes('1')||checked.includes('9');
+  box.innerHTML=`<b>우선전보 검토 대상:</b> ${checked.map(n=>'제26조 '+n+'호').join(', ')}<br><span class="small">원칙상 우선전보는 전보가능자 수의 50%를 초과할 수 없으며, 제1호·제9호는 50% 제한을 두지 않을 수 있습니다.${special?' 제1호 또는 제9호가 선택되어 있습니다.':''} 세부 증빙·적용 여부는 교육청 확인이 필요합니다.</span>`;
+}
+function calcAll(){
+  const career=calcCareer(); const rating=calcRating(); const bonus=calcBonus();
+  const total=career+rating+bonus;
+  document.getElementById('sCareer').textContent=career.toFixed(2);
+  document.getElementById('sRate').textContent=rating.toFixed(2);
+  document.getElementById('sBonus').textContent=bonus.toFixed(2);
+  document.getElementById('sTotal').textContent=total.toFixed(2);
+}
+function resetAll(){
+  if(!confirm('입력한 내용을 모두 초기화할까요?'))return;
+  segSeq=0;awardSeq=0;
+  renderCareerYears();
+  document.getElementById('rateMode').value='unselected';renderRateInputs();
+  document.querySelectorAll('input[type=number]').forEach(x=>{if(!x.id.startsWith('mon'))x.value=0});
+  document.querySelectorAll('input[type=checkbox]').forEach(x=>x.checked=false);
+  document.getElementById('iEtc').value='0';
+  renderEnglishYears();
+  document.getElementById('awardRows').innerHTML='';
+  calcPriority();calcAll();
+}
+
+renderCareerYears();
+renderRateInputs();
+renderEnglishYears();
+calcPriority();
+calcAll();
+</script>
+</body>
+</html>
